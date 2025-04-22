@@ -67,23 +67,15 @@
 <body>
   <h1>🚒 Estado Máquinas Octava</h1>
   <h2>🚌 Carros en Servicio</h2>
-  <div id="contenedor-carros">
-    <!-- Este contenido se reemplaza dinámicamente -->
-  </div>
+  <div id="contenedor-carros"></div>
   <div class="fecha" id="fecha-actualizacion"></div>
 
   <script>
-    // Función para obtener el HTML actualizado
     async function cargarEstado() {
       try {
-        const respuesta = await fetch('https://8vacbs.github.io/octavaCBS/estado_carros_actualizado.html');
-        const texto = await respuesta.text();
-
-        // Extraer solo la parte relevante del contenido
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(texto, 'text/html');
-
-        const h2 = doc.querySelector('h2');
+        const res = await fetch('https://8vacbs.github.io/octavaCBS/estado_carros_actualizado.html');
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
         const bloques = Array.from(doc.querySelectorAll('h2 + div > div'));
 
         const contenedor = document.getElementById('contenedor-carros');
@@ -108,18 +100,19 @@
           `;
         });
 
-        // Fecha y hora
         const ahora = new Date();
         const fecha = ahora.toLocaleDateString('es-CL');
         const hora = ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('fecha-actualizacion').textContent = `Última actualización: ${fecha}, ${hora}`;
 
-        // Altura dinámica para iframe
-        const altura = document.body.scrollHeight;
-        parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
+        // Enviar la altura al iframe padre
+        setTimeout(() => {
+          const altura = document.body.scrollHeight;
+          parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
+        }, 100);
 
       } catch (e) {
-        document.getElementById('contenedor-carros').innerHTML = '<p>No se pudo cargar el estado actual.</p>';
+        document.getElementById('contenedor-carros').innerHTML = '<p>Error al cargar el estado.</p>';
       }
     }
 
