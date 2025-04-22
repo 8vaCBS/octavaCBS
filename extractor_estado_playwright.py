@@ -5,19 +5,21 @@ def extraer_estado_carros():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.goto("https://icbs.cl/c/v/985", wait_until="networkidle")
-        
-        # Esperar a que aparezcan los carros (3 segundos de espera por seguridad)
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(3000)  # esperar carga completa
 
-        # Extraer la sección que contiene el estado de los carros
         try:
-            carros_html = page.locator("text=Carros en Servicio").locator("..").locator("..").inner_html()
-        except:
+            # Buscar contenedor que contiene "Carros en Servicio"
+            elemento = page.locator("text=Carros en Servicio").first
+            contenedor = elemento.locator("xpath=ancestor::div[contains(@class, 'col-md-6')]").first
+
+            # Extraer HTML del contenedor
+            carros_html = contenedor.inner_html()
+        except Exception as e:
+            print("Error al extraer carros:", e)
             carros_html = "<p>No se encontró información de los carros.</p>"
 
         browser.close()
 
-    # Construcción de HTML final
     html = f"""
     <!DOCTYPE html>
     <html lang="es">
