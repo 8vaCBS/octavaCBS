@@ -1,51 +1,52 @@
 import requests
 from bs4 import BeautifulSoup
 
-# URL desde donde se extraerán los datos
-url = "https://icbs.cl/c/v/985"
+# 1. Descargar la página fuente
+URL = "https://icbs.cl/c/v/985"
+response = requests.get(URL)
+response.encoding = 'utf-8'
+soup = BeautifulSoup(response.text, 'html.parser')
 
-try:
-    # Hacer la solicitud HTTP
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
+# 2. Extraer la tabla de estado de los carros (tabla completa)
+tabla = soup.find('table')
 
-    # Guardar el HTML descargado para depurar
-    with open("debug_icbs.html", "w", encoding="utf-8") as f:
-        f.write(response.text)
+# 3. Crear HTML de salida
+html_final = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estado Máquinas Octava</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }}
+        h1 {{
+            color: #c40000;
+            font-size: 28px;
+        }}
+        table {{
+            border-collapse: collapse;
+            width: 100%;
+        }}
+        th, td {{
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }}
+        th {{
+            background-color: #e91e63;
+            color: white;
+        }}
+    </style>
+</head>
+<body>
+    <h1>🚒 Estado Máquinas Octava</h1>
+    {str(tabla) if tabla else "<p>No se pudo cargar la tabla de datos.</p>"}
+</body>
+</html>
+"""
 
-    # Procesar el HTML con BeautifulSoup
-    soup = BeautifulSoup(response.text, "html.parser")
-    tabla = soup.find("table")
-
-    if not tabla:
-        raise ValueError("No se encontró ninguna tabla en el HTML.")
-
-    # Construir el archivo HTML de salida
-    html_salida = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Estado Máquinas Octava</title>
-        <style>
-            body { font-family: Arial, sans-serif; }
-            h1 { color: #b00; }
-            table { width: 100%%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #999; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-        </style>
-    </head>
-    <body>
-        <h1>🚒 Estado Máquinas Octava</h1>
-        %s
-    </body>
-    </html>
-    """ % str(tabla)
-
-    # Guardar el HTML generado
-    with open("estado_carros_actualizado.html", "w", encoding="utf-8") as f:
-        f.write(html_salida)
-
-except Exception as e:
-    with open("estado_carros_actualizado.html", "w", encoding="utf-8") as f:
-        f.write(f"<h1>Error al obtener datos:</h1><pre>{e}</pre>")
+# 4. Guardar como archivo HTML para publicar en GitHub Pages
+with open("estado_carros_actualizado.html", "w", encoding="utf-8") as f:
+    f.write(html_final)
