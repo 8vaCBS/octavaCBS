@@ -3,7 +3,7 @@ name: Estado ICBS Automático
 on:
   schedule:
     - cron: "*/30 * * * *"  # Cada 30 minutos
-  workflow_dispatch:  # Permite ejecutarlo manualmente también
+  workflow_dispatch:       # Permite ejecutarlo manualmente
 
 jobs:
   build:
