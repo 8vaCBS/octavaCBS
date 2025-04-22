@@ -2,8 +2,8 @@ name: Actualizar estado ICBS
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
-  workflow_dispatch:
+    - cron: '*/30 * * * *'  # Cada 30 minutos
+  workflow_dispatch:        # Permitir ejecución manual
 
 jobs:
   build:
@@ -16,7 +16,12 @@ jobs:
       - name: Instalar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
+
+      - name: Instalar Playwright y navegadores
+        run: |
+          npm install -D playwright
+          npx playwright install --with-deps
 
       - name: Instalar Python
         uses: actions/setup-python@v4
@@ -24,11 +29,7 @@ jobs:
           python-version: '3.10'
 
       - name: Instalar dependencias de Python
-        run: |
-          pip install -r requirements.txt
-
-      - name: Usar acción oficial de Playwright para instalar navegadores
-        uses: microsoft/playwright-github-action@v1
+        run: pip install -r requirements.txt
 
       - name: Ejecutar extracción con Playwright
         run: python extractor_estado_playwright.py
@@ -39,8 +40,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add estado_carros_actualizado.html
           if git diff --cached --quiet; then
-            echo "No hay cambios para subir"
+            echo "No hay cambios para hacer commit"
           else
-            git commit -m "Actualización automática del estado de los carros"
+            git commit -m "Actualización automática del estado de carros"
             git push
           fi
