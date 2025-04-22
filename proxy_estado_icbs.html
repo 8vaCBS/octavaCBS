@@ -43,7 +43,7 @@
   <script>
     async function cargarEstado() {
       try {
-        const res = await fetch("https://icbs.cl/c/v/985");
+        const res = await fetch("https://corsproxy.io/?https://icbs.cl/c/v/985");
         const html = await res.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
