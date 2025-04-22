@@ -7,112 +7,54 @@
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
+      padding: 0;
       margin: 0;
-      padding: 1rem;
     }
 
     .contenedor {
-      max-width: 600px;
-      margin: auto;
-      background-color: #fff;
-      border: 3px solid #c40000;
+      max-width: 100%;
+      border: 3px solid red;
       border-radius: 10px;
-      padding: 1.5rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 1rem;
+      background-color: white;
+      box-sizing: border-box;
     }
 
-    h1 {
-      font-size: 1.6rem;
-      color: #b00000;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    iframe {
+      width: 100%;
+      border: none;
     }
 
-    h2 {
-      font-size: 1.2rem;
-      color: #333;
-      border-bottom: 2px solid #ccc;
-      padding-bottom: 0.4rem;
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .carro {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1rem;
-      background-color: #fafafa;
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      gap: 0.5rem;
-    }
-
-    .carro img {
-      width: 80px;
-      height: auto;
-      border-radius: 5px;
-      object-fit: cover;
-    }
-
-    .estado {
-      font-size: 1rem;
-      font-weight: bold;
-    }
-
-    .servicio {
-      color: #008000;
-    }
-
-    .fuera {
-      color: #c40000;
-    }
-
-    .actualizado {
-      text-align: right;
-      margin-top: 1.2rem;
-      font-size: 0.9rem;
-      color: #555;
+    .actualizando {
+      text-align: center;
+      font-style: italic;
+      color: gray;
     }
   </style>
 </head>
 <body>
   <div class="contenedor">
-    <h1>🚒 Estado Máquinas Octava</h1>
-    <h2>🚛 Carros en Servicio</h2>
-
-    <div class="carro">
-      <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg" alt="M8">
-      <div class="estado fuera">M8 - FUERA DE SERVICIO</div>
-    </div>
-
-    <div class="carro">
-      <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg" alt="Q8">
-      <div class="estado fuera">Q8 - FUERA DE SERVICIO</div>
-    </div>
-
-    <div class="carro">
-      <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg" alt="RX8">
-      <div class="estado servicio">RX8 - EN SERVICIO</div>
-    </div>
-
-    <div class="actualizado">
-      Última actualización: <span id="fecha"></span>
+    <div id="contenido-proxy">
+      <p class="actualizando">Cargando estado actualizado…</p>
     </div>
   </div>
 
   <script>
-    const fecha = new Date();
-    const opciones = {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', hour12: false
-    };
-    document.getElementById("fecha").textContent = fecha.toLocaleString('es-CL', opciones);
+    fetch('estado_carros_actualizado.html')
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Extraer solo lo que está dentro del body del archivo fuente
+        const contenido = doc.body.innerHTML;
+        document.getElementById('contenido-proxy').innerHTML = contenido;
+      })
+      .catch(error => {
+        document.getElementById('contenido-proxy').innerHTML =
+          '<p style="color:red;">Error al cargar estado actualizado.</p>';
+        console.error('Error al cargar el estado actualizado:', error);
+      });
   </script>
 </body>
 </html>
