@@ -1,3 +1,4 @@
+# extractor_estado_playwright.py
 from playwright.sync_api import sync_playwright
 
 def extraer_estado_carros():
