@@ -1,4 +1,4 @@
-name: Extraer estado desde ICBS
+name: Estado ICBS Automático
 
 on:
   schedule:
