@@ -1,90 +1,24 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Estado de Máquinas - Octava</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f9f9f9;
-    }
-    .bloque {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .titulo {
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 6px;
-      color: #222;
-    }
-    .estado {
-      display: inline-block;
-      padding: 6px 12px;
-      font-weight: bold;
-      font-size: 14px;
-      border-radius: 20px;
-      color: white;
-      margin-top: 6px;
-    }
-    .ubicacion {
-      font-size: 13px;
-      color: #666;
-      margin-top: 4px;
-    }
-  </style>
-</head>
-<body>
-  <h2 style="margin-bottom: 20px; color:#e3000f;">🚒 Estado en Tiempo Real - Octava Compañía</h2>
-  <div id="contenedor"></div>
+<div id="estado-carros"></div>
 
-  <script>
-    async function cargarEstado() {
-      try {
-        const res = await fetch("https://icbs.cl/c/v/985");
-        const html = await res.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
+<script>
+  async function cargarDesdeProxy() {
+    try {
+      const respuesta = await fetch("https://8vacbs.github.io/octavaCBS/proxy_estado_icbs.html");
+      const html = await respuesta.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const bloque = doc.querySelector("#contenedor");
 
-        const filas = [...doc.querySelectorAll("table tbody tr")];
-        const claves = ["Q-8", "RX-8", "M-8"];
-        const resultados = filas.map(fila => {
-          const celdas = fila.querySelectorAll("td");
-          if (!celdas.length) return null;
-          const unidad = celdas[0].textContent.trim();
-          const estado = celdas[1].textContent.trim();
-          const lugar = celdas[2].textContent.trim();
-          if (claves.includes(unidad)) return { unidad, estado, lugar };
-          return null;
-        }).filter(Boolean);
-
-        const contenedor = document.getElementById("contenedor");
-        resultados.forEach(({ unidad, estado, lugar }) => {
-          const color = estado.toLowerCase().includes("servicio")
-            ? "#26c281"
-            : estado.toLowerCase().includes("disponible")
-            ? "#f7b731"
-            : "#eb3b5a";
-
-          contenedor.innerHTML += `
-            <div class="bloque">
-              <div class="titulo">${unidad}</div>
-              <div class="ubicacion">Ubicación: ${lugar}</div>
-              <span class="estado" style="background:${color}">${estado}</span>
-            </div>`;
-        });
-      } catch (err) {
-        document.getElementById("contenedor").innerHTML = `<p style="color:red;">⚠️ No se pudo cargar el estado en tiempo real.</p>`;
+      if (bloque) {
+        document.getElementById("estado-carros").innerHTML = bloque.innerHTML;
+      } else {
+        throw new Error("No se encontró el contenido del estado.");
       }
+    } catch (error) {
+      document.getElementById("estado-carros").innerHTML = "<p style='color:red;'>⚠️ No se pudo cargar el estado de las máquinas.</p>";
+      console.error(error);
     }
+  }
 
-    cargarEstado();
-  </script>
-</body>
-</html>
+  cargarDesdeProxy();
+</script>
