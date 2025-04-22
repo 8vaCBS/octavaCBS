@@ -1,155 +1,129 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estado Máquinas Octava</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
       margin: 0;
-      background-color: #f9f9f9;
-      padding: 10px;
-    }
-
-    .panel {
+      padding: 1rem;
       border: 3px solid #c00;
-      border-radius: 8px;
-      background-color: #fff;
-      padding: 15px;
-      box-sizing: border-box;
-      width: 100%;
+      border-radius: 10px;
     }
 
-    .panel h1 {
-      font-size: 22px;
+    h1 {
+      font-size: 1.5rem;
       color: #b30000;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 5px;
+      margin: 0 0 0.5rem 0;
     }
 
-    .panel h2 {
-      font-size: 18px;
+    h2 {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
       color: #333;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-      margin-bottom: 15px;
     }
 
     .carro {
+      background: #fff;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
       display: flex;
       align-items: center;
-      background-color: #f2f2f2;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .carro img {
-      width: 55px;
+      width: 60px;
       height: auto;
-      border-radius: 4px;
-      margin-right: 10px;
+      border-radius: 5px;
+      margin-right: 1rem;
     }
 
     .estado {
       font-weight: bold;
-      font-size: 15px;
+      font-size: 1rem;
     }
 
-    .verde {
-      color: #008000;
+    .estado.verde {
+      color: green;
     }
 
-    .rojo {
-      color: #c00;
+    .estado.rojo {
+      color: red;
     }
 
-    .footer {
-      font-size: 12px;
+    .fecha {
+      margin-top: 1rem;
+      font-size: 0.8rem;
       color: #555;
-      text-align: right;
-      margin-top: 10px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="panel">
-    <h1>🚒 Estado Máquinas Octava</h1>
-    <h2>🚛 Carros en Servicio</h2>
-
-    <!-- Aquí se insertan los datos dinámicamente -->
-    <div id="contenedor-carros">Cargando estado...</div>
-
-    <div class="footer" id="actualizado"></div>
+  <h1>🚒 Estado Máquinas Octava</h1>
+  <h2>🚌 Carros en Servicio</h2>
+  <div id="contenedor-carros">
+    <!-- Este contenido se reemplaza dinámicamente -->
   </div>
+  <div class="fecha" id="fecha-actualizacion"></div>
 
   <script>
-    const urlsImagenes = {
-      "M8": "https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg",
-      "Q8": "https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg",
-      "RX8": "https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg"
-    };
-
+    // Función para obtener el HTML actualizado
     async function cargarEstado() {
       try {
-        const res = await fetch('estado_carros_actualizado.html');
-        const html = await res.text();
+        const respuesta = await fetch('https://8vacbs.github.io/octavaCBS/estado_carros_actualizado.html');
+        const texto = await respuesta.text();
+
+        // Extraer solo la parte relevante del contenido
         const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const filas = [...doc.querySelectorAll('tr')];
+        const doc = parser.parseFromString(texto, 'text/html');
+
+        const h2 = doc.querySelector('h2');
+        const bloques = Array.from(doc.querySelectorAll('h2 + div > div'));
 
         const contenedor = document.getElementById('contenedor-carros');
         contenedor.innerHTML = '';
 
-        filas.forEach(fila => {
-          const nombre = fila.querySelector('td:nth-child(1)')?.textContent?.trim();
-          const estado = fila.querySelector('td:nth-child(2)')?.textContent?.trim();
+        bloques.forEach(bloque => {
+          const texto = bloque.textContent.trim();
+          const nombre = texto.split(' ')[0];
+          const estado = texto.includes('EN SERVICIO') ? 'EN SERVICIO' : 'FUERA DE SERVICIO';
+          const clase = estado === 'EN SERVICIO' ? 'verde' : 'rojo';
 
-          if (nombre && estado) {
-            const imgURL = urlsImagenes[nombre] || '';
-            const color = estado.includes("EN SERVICIO") ? "verde" : "rojo";
+          let imagenURL = '';
+          if (nombre === 'Q8') imagenURL = 'https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg';
+          if (nombre === 'RX8') imagenURL = 'https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg';
+          if (nombre === 'M8') imagenURL = 'https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg';
 
-            const div = document.createElement('div');
-            div.className = "carro";
-            div.innerHTML = `
-              <img src="${imgURL}" alt="${nombre}">
-              <div class="estado ${color}">${nombre} - ${estado}</div>
-            `;
-            contenedor.appendChild(div);
-          }
+          contenedor.innerHTML += `
+            <div class="carro">
+              <img src="${imagenURL}" alt="${nombre}" />
+              <div class="estado ${clase}">${nombre} - ${estado}</div>
+            </div>
+          `;
         });
 
+        // Fecha y hora
         const ahora = new Date();
-        document.getElementById("actualizado").textContent = "Última actualización: " +
-          ahora.toLocaleDateString('es-CL') + ", " + ahora.toLocaleTimeString('es-CL');
+        const fecha = ahora.toLocaleDateString('es-CL');
+        const hora = ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('fecha-actualizacion').textContent = `Última actualización: ${fecha}, ${hora}`;
 
-        // Enviar altura al iframe (para Elementor)
-        parent.postMessage({ tipo: "ajustarAltura", altura: document.body.scrollHeight }, "*");
+        // Altura dinámica para iframe
+        const altura = document.body.scrollHeight;
+        parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
+
       } catch (e) {
-        document.getElementById('contenedor-carros').innerHTML = 'Error al cargar el estado.';
-        console.error("Error al cargar estado_carros_actualizado.html", e);
+        document.getElementById('contenedor-carros').innerHTML = '<p>No se pudo cargar el estado actual.</p>';
       }
     }
 
     cargarEstado();
   </script>
-<script>
-  window.addEventListener('load', () => {
-    const altura = document.body.scrollHeight;
-    parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
-  });
-
-  // Si cambia el tamaño del contenido dinámicamente
-  setTimeout(() => {
-    const altura = document.body.scrollHeight;
-    parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
-  }, 300);
-</script>
-
 </body>
 </html>
