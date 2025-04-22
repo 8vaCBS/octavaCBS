@@ -138,5 +138,18 @@
 
     cargarEstado();
   </script>
+<script>
+  window.addEventListener('load', () => {
+    const altura = document.body.scrollHeight;
+    parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
+  });
+
+  // Si cambia el tamaño del contenido dinámicamente
+  setTimeout(() => {
+    const altura = document.body.scrollHeight;
+    parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
+  }, 300);
+</script>
+
 </body>
 </html>
