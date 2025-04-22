@@ -2,121 +2,68 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estado Máquinas Octava</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f8f8;
       margin: 0;
-      padding: 1rem;
-      border: 3px solid #c00;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 15px;
+    }
+    .contenedor {
+      border: 3px solid red;
       border-radius: 10px;
+      padding: 15px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    h1 {
-      font-size: 1.5rem;
-      color: #b30000;
-      margin: 0 0 0.5rem 0;
-    }
-
-    h2 {
-      font-size: 1.2rem;
-      margin-top: 0.5rem;
-      color: #333;
-    }
-
-    .carro {
-      background: #fff;
-      border-radius: 8px;
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .carro img {
-      width: 60px;
-      height: auto;
-      border-radius: 5px;
-      margin-right: 1rem;
-    }
-
-    .estado {
+    .titulo {
+      font-size: 20px;
       font-weight: bold;
-      font-size: 1rem;
+      color: darkred;
+      margin-bottom: 10px;
     }
-
-    .estado.verde {
-      color: green;
-    }
-
-    .estado.rojo {
-      color: red;
-    }
-
-    .fecha {
-      margin-top: 1rem;
-      font-size: 0.8rem;
-      color: #555;
+    .actualizacion {
+      font-size: 12px;
       text-align: center;
+      color: #555;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>🚒 Estado Máquinas Octava</h1>
-  <h2>🚌 Carros en Servicio</h2>
-  <div id="contenedor-carros"></div>
-  <div class="fecha" id="fecha-actualizacion"></div>
+  <div class="contenedor">
+    <div class="titulo">🚒 Estado Máquinas Octava</div>
+    <div id="contenido"></div>
+    <div class="actualizacion">Última actualización: <span id="hora"></span></div>
+  </div>
 
   <script>
-    async function cargarEstado() {
-      try {
-        const res = await fetch('https://8vacbs.github.io/octavaCBS/estado_carros_actualizado.html');
-        const html = await res.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const bloques = Array.from(doc.querySelectorAll('h2 + div > div'));
+    // Cargar HTML actualizado
+    fetch("https://8vacbs.github.io/octavaCBS/estado_carros_actualizado.html")
+      .then(response => response.text())
+      .then(data => {
+        const temp = document.createElement('div');
+        temp.innerHTML = data;
+        const estado = temp.querySelector('body')?.innerHTML || 'No disponible';
+        document.getElementById("contenido").innerHTML = estado;
 
-        const contenedor = document.getElementById('contenedor-carros');
-        contenedor.innerHTML = '';
-
-        bloques.forEach(bloque => {
-          const texto = bloque.textContent.trim();
-          const nombre = texto.split(' ')[0];
-          const estado = texto.includes('EN SERVICIO') ? 'EN SERVICIO' : 'FUERA DE SERVICIO';
-          const clase = estado === 'EN SERVICIO' ? 'verde' : 'rojo';
-
-          let imagenURL = '';
-          if (nombre === 'Q8') imagenURL = 'https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg';
-          if (nombre === 'RX8') imagenURL = 'https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg';
-          if (nombre === 'M8') imagenURL = 'https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg';
-
-          contenedor.innerHTML += `
-            <div class="carro">
-              <img src="${imagenURL}" alt="${nombre}" />
-              <div class="estado ${clase}">${nombre} - ${estado}</div>
-            </div>
-          `;
-        });
-
+        // Insertar hora actual
         const ahora = new Date();
-        const fecha = ahora.toLocaleDateString('es-CL');
-        const hora = ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('fecha-actualizacion').textContent = `Última actualización: ${fecha}, ${hora}`;
+        const hora = ahora.toLocaleString("es-CL", {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+        document.getElementById("hora").innerText = hora;
 
-        // Enviar la altura al iframe padre
+        // Notificar altura al iframe
         setTimeout(() => {
-          const altura = document.body.scrollHeight;
-          parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
-        }, 100);
-
-      } catch (e) {
-        document.getElementById('contenedor-carros').innerHTML = '<p>Error al cargar el estado.</p>';
-      }
-    }
-
-    cargarEstado();
+          parent.postMessage({
+            tipo: "ajustarAltura",
+            altura: document.body.scrollHeight
+          }, "*");
+        }, 300);
+      });
   </script>
 </body>
 </html>
