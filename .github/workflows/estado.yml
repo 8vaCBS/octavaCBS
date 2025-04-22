@@ -3,41 +3,41 @@ name: Actualizar estado ICBS
 on:
   schedule:
     - cron: "*/30 * * * *"  # Cada 30 minutos
-  workflow_dispatch:        # Permite ejecución manual
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clonar repositorio
-      uses: actions/checkout@v3
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
 
-    - name: Instalar Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-    - name: Instalar Playwright y dependencias
-      run: |
-        npm install -D playwright
-        npx playwright install --with-deps
+      - name: Instalar Playwright y dependencias
+        run: |
+          npm install -g playwright
+          playwright install
 
-    - name: Instalar Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Instalar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Instalar dependencias de Python
-      run: pip install -r requirements.txt
+      - name: Instalar dependencias de Python
+        run: pip install -r requirements.txt
 
-    - name: Ejecutar extracción con Playwright
-      run: python extractor_estado_playwright.py
+      - name: Ejecutar extracción con Playwright
+        run: python extractor_estado_playwright.py
 
-    - name: Confirmar y hacer push si hubo cambios
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add estado_carros_actualizado.html || echo "Nada que agregar"
-        git commit -m "Actualización automática del estado con Playwright" || echo "Sin cambios"
-        git push
+      - name: Confirmar y hacer push si hubo cambios
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add estado_carros_actualizado.html || echo "No hay cambios que agregar"
+          git diff --cached --quiet || git commit -m "Actualización automática del estado de los carros"
+          git push
