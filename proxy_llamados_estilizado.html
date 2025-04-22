@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Últimos Llamados Octava</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      border: 2px solid #d30000;
+      border-radius: 12px;
+      padding: 1rem;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    h2 {
+      color: #d30000;
+      font-size: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    h2::before {
+      content: "📣";
+      margin-right: 8px;
+    }
+    iframe {
+      width: 100%;
+      height: auto;
+      border: none;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 1rem;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 0.5rem;
+      }
+      h2 {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Últimos Llamados</h2>
+    <iframe src="https://8vacbs.github.io/octavaCBS/llamados_actualizado.html" loading="lazy"></iframe>
+    <footer>Actualizado automáticamente desde ICBS • 22-04-2025, 23:41</footer>
+  </div>
+</body>
+</html>
