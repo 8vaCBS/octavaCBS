@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  playwright:
+    build: .
+    command: python extractor_estado_playwright.py
+    volumes:
+      - .:/app
