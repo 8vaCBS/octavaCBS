@@ -2,85 +2,71 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Últimos Llamados - Octava</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background: #f7f7f7;
       margin: 0;
-      padding: 10px;
+      padding: 20px;
     }
-
     .contenedor {
-      background: white;
-      border: 2px solid #d00000;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      max-width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border: 3px solid #e3000f;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
     h2 {
-      margin-top: 0;
+      color: #e3000f;
       font-size: 22px;
-      border-bottom: 2px solid #ccc;
-      padding-bottom: 6px;
-      color: #d00000;
+      margin-bottom: 16px;
     }
-
     .llamado {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-      background-color: #fefefe;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
     }
-
+    .llamado:last-child {
+      border-bottom: none;
+    }
     .hora {
-      font-size: 0.85em;
-      color: #666;
-      margin-bottom: 4px;
-    }
-
-    .detalle {
       font-weight: bold;
-      color: #111;
+      color: #333;
+    }
+    .detalle {
+      font-size: 15px;
+      color: #555;
+    }
+    .actualizado {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #777;
+      text-align: right;
     }
   </style>
 </head>
 <body>
-  <div class="contenedor">
-    <h2>📣 Últimos Llamados</h2>
-    <div id="contenido"></div>
+  <div class="contenedor" id="contenido">
+    <h2>🚨 Últimos llamados de la Octava</h2>
+    <div>Cargando llamados en tiempo real...</div>
   </div>
 
   <script>
     async function cargarLlamados() {
       try {
-        const res = await fetch('https://8vacbs.github.io/octavaCBS/llamados_actualizado.html');
-        const texto = await res.text();
-        const lineas = texto.trim().split('\n');
-
-        const contenedor = document.getElementById("contenido");
-        lineas.forEach(linea => {
-          const [fechaHora, detalle] = linea.split('|');
-          const div = document.createElement("div");
-          div.className = "llamado";
-
-          div.innerHTML = `
-            <div class="hora">${fechaHora.trim()}</div>
-            <div class="detalle">${detalle.trim()}</div>
-          `;
-
-          contenedor.appendChild(div);
-        });
-      } catch (err) {
-        document.getElementById("contenido").innerText = "No se pudieron cargar los llamados.";
+        const res = await fetch("https://8vacbs.github.io/octavaCBS/llamados_actualizado.html?_=" + Date.now());
+        const html = await res.text();
+        document.getElementById("contenido").innerHTML = html;
+      } catch (e) {
+        document.getElementById("contenido").innerHTML = "<p style='color:red;'>No se pudo cargar la información de los llamados.</p>";
       }
     }
 
     cargarLlamados();
+    setInterval(cargarLlamados, 600000); // cada 10 minutos
   </script>
 </body>
 </html>
