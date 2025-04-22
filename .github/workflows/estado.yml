@@ -3,31 +3,41 @@ name: Actualizar estado ICBS
 on:
   schedule:
     - cron: "*/30 * * * *"  # Cada 30 minutos
-  workflow_dispatch:       # Activación manual opcional
+  workflow_dispatch:        # Permite ejecución manual
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clonar repositorio
-        uses: actions/checkout@v3
+    - name: Clonar repositorio
+      uses: actions/checkout@v3
 
-      - name: Instalar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Instalar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
 
-      - name: Instalar dependencias
-        run: pip install requests-html
+    - name: Instalar Playwright y dependencias
+      run: |
+        npm install -D playwright
+        npx playwright install --with-deps
 
-      - name: Ejecutar script de extracción
-        run: python extractor_estado.py
+    - name: Instalar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: Confirmar y hacer push si hubo cambios
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add estado_carros_actualizado.html
-          git diff --cached --quiet || git commit -m "Actualización automática del estado"
-          git push
+    - name: Instalar dependencias de Python
+      run: pip install -r requirements.txt
+
+    - name: Ejecutar extracción con Playwright
+      run: python extractor_estado_playwright.py
+
+    - name: Confirmar y hacer push si hubo cambios
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add estado_carros_actualizado.html || echo "Nada que agregar"
+        git commit -m "Actualización automática del estado con Playwright" || echo "Sin cambios"
+        git push
