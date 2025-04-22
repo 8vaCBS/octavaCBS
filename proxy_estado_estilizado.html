@@ -1,60 +1,127 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Estado Máquinas Octava</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
-      padding: 0;
+      padding: 1rem;
       margin: 0;
     }
 
-    .contenedor {
-      max-width: 100%;
-      border: 3px solid red;
+    .panel {
+      border: 3px solid #d00;
       border-radius: 10px;
       padding: 1rem;
       background-color: white;
-      box-sizing: border-box;
+      max-width: 360px;
+      margin: auto;
     }
 
-    iframe {
-      width: 100%;
-      border: none;
+    h2 {
+      margin-top: 0;
+      color: #b00000;
     }
 
-    .actualizando {
-      text-align: center;
-      font-style: italic;
-      color: gray;
+    .estado {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #f9f9f9;
+    }
+
+    .estado img {
+      width: 60px;
+      height: auto;
+      border-radius: 4px;
+    }
+
+    .fuera {
+      color: red;
+      font-weight: bold;
+    }
+
+    .servicio {
+      color: green;
+      font-weight: bold;
+    }
+
+    .actualizacion {
+      font-size: 0.8rem;
+      text-align: right;
+      color: #555;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="contenedor">
-    <div id="contenido-proxy">
-      <p class="actualizando">Cargando estado actualizado…</p>
-    </div>
+  <div class="panel">
+    <h2>🚒 Estado Máquinas Octava</h2>
+    <h3>🟢 Carros en Servicio</h3>
+    <div id="contenedor"></div>
+    <div class="actualizacion" id="fechaActualizacion"></div>
   </div>
 
   <script>
-    fetch('estado_carros_actualizado.html')
-      .then(response => response.text())
-      .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
+    async function cargarEstado() {
+      try {
+        const respuesta = await fetch('https://8vacbs.github.io/octavaCBS/estado_carros_actualizado.html');
+        const texto = await respuesta.text();
 
-        // Extraer solo lo que está dentro del body del archivo fuente
-        const contenido = doc.body.innerHTML;
-        document.getElementById('contenido-proxy').innerHTML = contenido;
-      })
-      .catch(error => {
-        document.getElementById('contenido-proxy').innerHTML =
-          '<p style="color:red;">Error al cargar estado actualizado.</p>';
-        console.error('Error al cargar el estado actualizado:', error);
-      });
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(texto, 'text/html');
+        const bloques = doc.querySelectorAll('.estado-carro');
+
+        const contenedor = document.getElementById('contenedor');
+        contenedor.innerHTML = '';
+
+        bloques.forEach(bloque => {
+          const nombre = bloque.querySelector('.nombre-carro')?.textContent?.trim();
+          const estado = bloque.querySelector('.estado-carro-estado')?.textContent?.trim();
+          let claseEstado = estado?.includes('EN SERVICIO') ? 'servicio' : 'fuera';
+
+          let urlImg = '';
+          if (nombre?.includes('Q8')) urlImg = 'https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg';
+          else if (nombre?.includes('RX8')) urlImg = 'https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg';
+          else if (nombre?.includes('M8')) urlImg = 'https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg';
+
+          contenedor.innerHTML += `
+            <div class="estado">
+              <img src="${urlImg}" alt="${nombre}">
+              <div><span class="${claseEstado}">${nombre} - ${estado}</span></div>
+            </div>
+          `;
+        });
+
+        // Fecha actual de actualización
+        const fecha = new Date();
+        const opciones = {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit'
+        };
+        document.getElementById('fechaActualizacion').textContent =
+          `Última actualización: ${fecha.toLocaleDateString('es-CL', opciones)}`;
+
+        // Enviar altura al iframe (solo si se usa esta técnica)
+        if (window.parent !== window) {
+          window.parent.postMessage({
+            tipo: 'ajustarAltura',
+            altura: document.body.scrollHeight
+          }, '*');
+        }
+      } catch (error) {
+        console.error('Error cargando estado:', error);
+        document.getElementById('contenedor').textContent = 'No se pudo cargar el estado.';
+      }
+    }
+
+    cargarEstado();
   </script>
 </body>
 </html>
