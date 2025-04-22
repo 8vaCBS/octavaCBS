@@ -3,7 +3,7 @@ name: Actualizar estado ICBS
 on:
   schedule:
     - cron: '*/30 * * * *'  # Cada 30 minutos
-  workflow_dispatch:        # Permitir ejecución manual
+  workflow_dispatch:        # Manual
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
       - name: Instalar Playwright y navegadores
         run: |
           npm install -D playwright
-          npx playwright install --with-deps
+          npx playwright install chromium --with-deps
 
       - name: Instalar Python
         uses: actions/setup-python@v4
