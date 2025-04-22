@@ -1,0 +1,36 @@
+name: Actualizar llamados
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"  # Cada 10 minutos
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          playwright install --with-deps
+
+      - name: Ejecutar script de llamados
+        run: python extractor_llamados.py
+
+      - name: Commit y push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add llamados_actualizado.html
+          git commit -m "Actualización automática de llamados"
+          git push
