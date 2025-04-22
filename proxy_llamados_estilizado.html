@@ -106,5 +106,13 @@
 
     cargarLlamados();
   </script>
+  <script>
+  // Enviar altura automáticamente al sitio padre
+  setTimeout(() => {
+    const altura = document.body.scrollHeight;
+    window.parent.postMessage({ tipo: "ajustar-altura-llamados", altura }, "*");
+  }, 500);
+</script>
+
 </body>
 </html>
