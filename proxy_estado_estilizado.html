@@ -2,81 +2,123 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Estado Máquinas Octava</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #f7f7f7;
-      padding: 10px;
       margin: 0;
-      border: 4px solid #d40000;
+      padding: 0;
+    }
+    .container {
+      max-width: 360px;
+      margin: auto;
+      padding: 10px;
+      background-color: #ffffff;
+      border: 4px solid red;
       border-radius: 10px;
-      box-sizing: border-box;
     }
     h1 {
-      color: #b10000;
-      margin-top: 0;
-      font-size: 20px;
+      color: darkred;
+      font-size: 1.4em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
     }
-    .carro {
-      background-color: white;
-      border-radius: 8px;
-      padding: 8px;
+    h2 {
+      font-size: 1.1em;
+      color: #333;
       margin-bottom: 10px;
       display: flex;
       align-items: center;
-      border: 1px solid #ccc;
+      gap: 10px;
+    }
+    .carro {
+      background: #f2f2f2;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .carro img {
       width: 60px;
       height: auto;
-      margin-right: 10px;
-      border-radius: 4px;
+      border-radius: 5px;
     }
     .estado {
       font-weight: bold;
-      font-size: 14px;
     }
-    .verde {
-      color: green;
-    }
-    .rojo {
-      color: red;
-    }
-    .fecha {
-      text-align: right;
-      font-size: 12px;
+    .fuera { color: red; }
+    .servicio { color: green; }
+    .actualizacion {
+      font-size: 0.8em;
+      text-align: center;
       color: #555;
       margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>🚒 Estado Máquinas Octava</h1>
-  <h2>🚌 Carros en Servicio</h2>
-
-  <div class="carro">
-    <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg" alt="M8" />
-    <div class="estado rojo">M8 - FUERA DE SERVICIO</div>
+  <div class="container">
+    <h1>🚒 Estado Máquinas Octava</h1>
+    <h2>Carros en Servicio</h2>
+    <div id="estado-carros">
+      Cargando estado de los carros...
+    </div>
+    <div class="actualizacion">Última actualización: 22-04-2025, 20:09</div>
   </div>
-  <div class="carro">
-    <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg" alt="Q8" />
-    <div class="estado rojo">Q8 - FUERA DE SERVICIO</div>
-  </div>
-  <div class="carro">
-    <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg" alt="RX8" />
-    <div class="estado verde">RX8 - EN SERVICIO</div>
-  </div>
-
-  <div class="fecha">Última actualización: 22-04-2025, 15:52</div>
 
   <script>
-    // Al cargar, envía altura al iframe
-    window.onload = () => {
-      const altura = document.body.scrollHeight;
-      parent.postMessage({ tipo: "ajustarAltura", altura }, "*");
-    };
+    async function cargarEstado() {
+      try {
+        const respuesta = await fetch("estado_carros_actualizado.html");
+        const html = await respuesta.text();
+
+        const contenedor = document.getElementById("estado-carros");
+        contenedor.innerHTML = "";
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const carros = doc.querySelectorAll("div");
+
+        const imagenes = {
+          "Q8": "https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg",
+          "RX8": "https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg",
+          "M8": "https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg",
+        };
+
+        carros.forEach(carro => {
+          const texto = carro.textContent.trim();
+          const match = texto.match(/(M8|Q8|RX8)\s*-\s*(EN SERVICIO|FUERA DE SERVICIO)/i);
+          if (match) {
+            const clave = match[1];
+            const estadoTexto = match[2].toUpperCase();
+            const img = imagenes[clave] || "";
+
+            const div = document.createElement("div");
+            div.className = "carro";
+            div.innerHTML = `
+              <img src="${img}" alt="${clave}" />
+              <div class="estado ${estadoTexto === 'EN SERVICIO' ? 'servicio' : 'fuera'}">${clave} - ${estadoTexto}</div>
+            `;
+            contenedor.appendChild(div);
+          }
+        });
+
+        // Enviar altura ajustada para iframe si es necesario
+        parent.postMessage({ tipo: "ajustarAltura", altura: document.body.scrollHeight }, "*");
+
+      } catch (error) {
+        document.getElementById("estado-carros").textContent = "No se pudo cargar el estado.";
+        console.error(error);
+      }
+    }
+
+    cargarEstado();
   </script>
 </body>
 </html>
