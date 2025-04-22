@@ -1,72 +1,36 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Últimos Llamados - Octava</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f7f7;
-      margin: 0;
-      padding: 20px;
-    }
-    .contenedor {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #fff;
-      border: 3px solid #e3000f;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h2 {
-      color: #e3000f;
-      font-size: 22px;
-      margin-bottom: 16px;
-    }
-    .llamado {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
-    }
-    .llamado:last-child {
-      border-bottom: none;
-    }
-    .hora {
-      font-weight: bold;
-      color: #333;
-    }
-    .detalle {
-      font-size: 15px;
-      color: #555;
-    }
-    .actualizado {
-      margin-top: 16px;
-      font-size: 12px;
-      color: #777;
-      text-align: right;
-    }
-  </style>
-</head>
-<body>
-  <div class="contenedor" id="contenido">
-    <h2>🚨 Últimos llamados de la Octava</h2>
-    <div>Cargando llamados en tiempo real...</div>
-  </div>
+name: Actualizar llamados
 
-  <script>
-    async function cargarLlamados() {
-      try {
-        const res = await fetch("https://8vacbs.github.io/octavaCBS/llamados_actualizado.html?_=" + Date.now());
-        const html = await res.text();
-        document.getElementById("contenido").innerHTML = html;
-      } catch (e) {
-        document.getElementById("contenido").innerHTML = "<p style='color:red;'>No se pudo cargar la información de los llamados.</p>";
-      }
-    }
+on:
+  schedule:
+    - cron: "*/10 * * * *"  # Cada 10 minutos
+  workflow_dispatch:
 
-    cargarLlamados();
-    setInterval(cargarLlamados, 600000); // cada 10 minutos
-  </script>
-</body>
-</html>
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          playwright install --with-deps
+
+      - name: Ejecutar script de llamados
+        run: python extractor_llamados.py
+
+      - name: Commit y push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add llamados_actualizado.html
+          git commit -m "Actualización automática de llamados"
+          git push
