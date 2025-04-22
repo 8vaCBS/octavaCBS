@@ -21,7 +21,7 @@ jobs:
     - name: Instalar Playwright y navegadores
       run: |
         npm install -D playwright
-        npx playwright install --with-deps
+        npx playwright install chromium
 
     - name: Instalar Python
       uses: actions/setup-python@v4
