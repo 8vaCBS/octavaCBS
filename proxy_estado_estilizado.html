@@ -2,93 +2,81 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estado Máquinas Octava</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background-color: #f7f7f7;
       padding: 10px;
       margin: 0;
-    }
-    .panel {
-      border: 3px solid red;
+      border: 4px solid #d40000;
       border-radius: 10px;
-      background: white;
-      padding: 10px;
-      max-width: 400px;
-      margin: auto;
+      box-sizing: border-box;
     }
     h1 {
-      font-size: 22px;
-      color: #b00000;
-      margin-bottom: 5px;
-    }
-    .carros {
-      font-size: 18px;
-      margin: 10px 0;
-      color: #333;
-      font-weight: bold;
+      color: #b10000;
+      margin-top: 0;
+      font-size: 20px;
     }
     .carro {
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 10px;
+      background-color: white;
+      border-radius: 8px;
       padding: 8px;
-      background: #f4f4f4;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      border: 1px solid #ccc;
     }
     .carro img {
-      width: 50px;
+      width: 60px;
       height: auto;
+      margin-right: 10px;
       border-radius: 4px;
     }
-    .estado-rojo {
-      color: red;
+    .estado {
       font-weight: bold;
+      font-size: 14px;
     }
-    .estado-verde {
+    .verde {
       color: green;
-      font-weight: bold;
     }
-    .actualizacion {
+    .rojo {
+      color: red;
+    }
+    .fecha {
+      text-align: right;
       font-size: 12px;
-      color: #666;
-      text-align: center;
+      color: #555;
       margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="panel">
-    <h1>🚒 Estado Máquinas Octava</h1>
-    <div class="carros">Carros en Servicio</div>
+  <h1>🚒 Estado Máquinas Octava</h1>
+  <h2>🚌 Carros en Servicio</h2>
 
-    <div class="carro">
-      <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg" alt="M8">
-      <div><span class="estado-rojo">M8 - FUERA DE SERVICIO</span></div>
-    </div>
-
-    <div class="carro">
-      <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg" alt="Q8">
-      <div><span class="estado-rojo">Q8 - FUERA DE SERVICIO</span></div>
-    </div>
-
-    <div class="carro">
-      <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg" alt="RX8">
-      <div><span class="estado-verde">RX8 - EN SERVICIO</span></div>
-    </div>
-
-    <div class="actualizacion">Última actualización: 22-04-2025, 15:37</div>
+  <div class="carro">
+    <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/m8-e1745275551505.jpeg" alt="M8" />
+    <div class="estado rojo">M8 - FUERA DE SERVICIO</div>
+  </div>
+  <div class="carro">
+    <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/q8-3-e1745275584217.jpeg" alt="Q8" />
+    <div class="estado rojo">Q8 - FUERA DE SERVICIO</div>
+  </div>
+  <div class="carro">
+    <img src="https://octavabomberos.cl/wp-content/uploads/2025/04/rx8-3-e1745275566483.jpeg" alt="RX8" />
+    <div class="estado verde">RX8 - EN SERVICIO</div>
   </div>
 
+  <div class="fecha">Última actualización: 22-04-2025, 15:52</div>
+
   <script>
-    window.addEventListener('load', () => {
+    // Al cargar, envía altura al iframe
+    window.onload = () => {
       const altura = document.body.scrollHeight;
-      window.parent.postMessage({ tipo: 'ajustarAltura', altura }, '*');
-    });
+      parent.postMessage({ tipo: "ajustarAltura", altura }, "*");
+    };
   </script>
 </body>
 </html>
