@@ -1,24 +1,87 @@
-<div id="estado-carros"></div>
-
-<script>
-  async function cargarDesdeProxy() {
-    try {
-      const respuesta = await fetch("https://8vacbs.github.io/octavaCBS/proxy_estado_icbs.html");
-      const html = await respuesta.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      const bloque = doc.querySelector("#contenedor");
-
-      if (bloque) {
-        document.getElementById("estado-carros").innerHTML = bloque.innerHTML;
-      } else {
-        throw new Error("No se encontró el contenido del estado.");
-      }
-    } catch (error) {
-      document.getElementById("estado-carros").innerHTML = "<p style='color:red;'>⚠️ No se pudo cargar el estado de las máquinas.</p>";
-      console.error(error);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estado en Tiempo Real - Octava Compañía</title>
+  <meta http-equiv="refresh" content="1800"> <!-- Refresca cada 30 minutos -->
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
     }
-  }
+    .bloque {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .titulo {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .estado {
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: white;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .ubicacion {
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="color:#e3000f;">🚒 Estado en Tiempo Real - Octava Compañía</h2>
+  <div id="estado-carros">Cargando datos...</div>
 
-  cargarDesdeProxy();
-</script>
+  <script>
+    async function cargarEstado() {
+      try {
+        const res = await fetch("https://icbs.cl/c/v/985");
+        const html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const filas = doc.querySelectorAll("table tbody tr");
+        const claves = ["Q-8", "RX-8", "M-8"];
+        const estadoHTML = [];
+
+        filas.forEach(fila => {
+          const celdas = fila.querySelectorAll("td");
+          if (celdas.length < 3) return;
+
+          const unidad = celdas[0].innerText.trim();
+          const estado = celdas[1].innerText.trim();
+          const ubicacion = celdas[2].innerText.trim();
+
+          if (claves.includes(unidad)) {
+            let color = "#eb3b5a"; // No disponible por defecto
+            if (estado.toLowerCase().includes("servicio")) color = "#26c281";
+            else if (estado.toLowerCase().includes("disponible")) color = "#f7b731";
+
+            estadoHTML.push(`
+              <div class="bloque">
+                <div class="titulo">${unidad}</div>
+                <div class="estado" style="background:${color};">${estado}</div>
+                <div class="ubicacion">Ubicación: ${ubicacion}</div>
+              </div>
+            `);
+          }
+        });
+
+        document.getElementById("estado-carros").innerHTML = estadoHTML.join("");
+      } catch (e) {
+        document.getElementById("estado-carros").innerHTML = `<p style="color:red;">⚠️ No se pudo cargar el estado de las máquinas.</p>`;
+        console.error(e);
+      }
+    }
+
+    cargarEstado();
+  </script>
+</body>
+</html>
