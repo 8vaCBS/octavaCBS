@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado Máquinas Embed</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .estado-container {
+      max-width: 500px;
+      margin: 20px auto;
+      border: 2px solid #e3000f;
+      border-radius: 12px;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .estado-container h2 {
+      color: #e3000f;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .estado-maquina {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .estado-maquina img {
+      width: 40px;
+      height: auto;
+      border-radius: 4px;
+    }
+    .estado-maquina span {
+      font-size: 16px;
+    }
+    .actualizado {
+      font-size: 12px;
+      text-align: center;
+      color: #555;
+      margin-top: 15px;
+    }
+    @media (max-width: 600px) {
+      .estado-container {
+        width: 90%;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="estado-container">
+    <h2>🚒 Estado Máquinas Octava</h2>
+    <div id="estadoMaquinas">Cargando estado...</div>
+    <div class="actualizado" id="actualizado"></div>
+  </div>
+
+  <script>
+    fetch('https://8vacbs.github.io/octavaCBS/estado_carros_actualizado.html')
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const bloques = doc.querySelectorAll('.carro');
+
+        const contenedor = document.getElementById('estadoMaquinas');
+        contenedor.innerHTML = '';
+        bloques.forEach(div => {
+          const nombre = div.querySelector('.nombre')?.textContent || 'Sin nombre';
+          const estado = div.querySelector('.estado')?.textContent || '';
+          const imagen = div.querySelector('img')?.src || '';
+
+          const htmlBlock = `
+            <div class="estado-maquina">
+              <img src="${imagen}" alt="maquina">
+              <span><strong>${nombre}</strong><br>${estado}</span>
+            </div>
+          `;
+          contenedor.innerHTML += htmlBlock;
+        });
+
+        const fecha = doc.querySelector('.actualizado')?.textContent || '';
+        document.getElementById('actualizado').textContent = fecha;
+      })
+      .catch(err => {
+        document.getElementById('estadoMaquinas').textContent = "No se pudo cargar el estado.";
+      });
+  </script>
+</body>
+</html>
