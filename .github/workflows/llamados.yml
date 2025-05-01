@@ -1,0 +1,35 @@
+name: Actualizar llamados
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install
+
+      - name: Run extractor
+        run: python extractor_llamados.py
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'Octava CBS Bot'
+          git config --global user.email 'bot@octavacbs.cl'
+          git add llamados_actualizado.html
+          git commit -m "Actualización automática de llamados"
+          git push
