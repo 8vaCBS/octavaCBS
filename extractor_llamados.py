@@ -1,47 +1,50 @@
-
 from playwright.sync_api import sync_playwright
 from datetime import datetime
-import os
+
+URL = "https://icbs.cl/c/v/985"
+ARCHIVO_SALIDA = "llamados_actualizado.html"
 
 def extraer_llamados():
     with sync_playwright() as p:
         navegador = p.chromium.launch()
         pagina = navegador.new_page()
-        pagina.goto("https://icbs.cl/c/v/985", timeout=90000)
-
-        # Esperar que se cargue la tabla de llamados
-        try:
-            pagina.wait_for_selector("div#resultado .tabla15 tr", timeout=60000)
-        except Exception as e:
-            print("⚠️ No se encontró la tabla de llamados:", e)
-            navegador.close()
-            return []
-
-        filas = pagina.query_selector_all("div#resultado .tabla15 tr")[1:]  # omitir cabecera
-
+        pagina.goto(URL, timeout=60000)
+        pagina.wait_for_selector(".tabla14, .tabla15", timeout=60000)
+        filas = pagina.query_selector_all(".tabla14, .tabla15")
         llamados = []
-        for fila in filas[:5]:
-            columnas = fila.query_selector_all("td")
-            if len(columnas) >= 2:
-                fecha = columnas[0].inner_text().strip()
-                descripcion = columnas[1].inner_text().strip()
-                llamados.append((fecha, descripcion))
+
+        for fila in filas:
+            fecha = fila.query_selector("td:nth-child(2) div") or fila.query_selector("td:nth-child(2)")
+            clave_direccion = fila.query_selector("td:nth-child(2)") or ""
+            maquinas = fila.query_selector("td:nth-child(5)")
+
+            llamados.append({
+                "fecha": fecha.inner_text().strip() if fecha else "",
+                "descripcion": clave_direccion.inner_text().strip() if clave_direccion else "",
+                "maquinas": maquinas.inner_text().strip() if maquinas else "",
+            })
 
         navegador.close()
         return llamados
 
-def generar_bloques(llamados):
-    if not llamados:
-        return '<div class="llamado"><p>No se encontró información de los llamados.</p></div>'
-    return "\n".join(
-        f'<div class="llamado"><p><strong>{fecha}</strong><br>{descripcion}</p></div>'
-        for fecha, descripcion in llamados
-    )
-
 def generar_html(llamados):
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    bloques = generar_bloques(llamados)
-    html = f"""<!DOCTYPE html>
+
+    bloques = ""
+    for llamado in llamados:
+        bloques += f"""
+        <div class="llamado">
+            <div class="fecha">{llamado['fecha']}</div>
+            <div class="descripcion">{llamado['descripcion']}</div>
+            <div class="maquinas">{llamado['maquinas']}</div>
+        </div>
+        """
+
+    if not llamados:
+        bloques = "<p>No se encontró información de los llamados.</p>"
+
+    return f"""
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -49,49 +52,47 @@ def generar_html(llamados):
     <style>
         body {{
             font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 20px;
+            background-color: #f5f5f5;
+            margin: 2em;
         }}
         .contenedor {{
-            max-width: 600px;
+            background: white;
+            max-width: 800px;
             margin: auto;
-            background: #fff;
+            padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }}
-        .encabezado {{
-            background: #002855;
+        .titulo {{
+            background-color: #002f6c;
             color: white;
-            padding: 16px;
-            font-size: 18px;
-            font-weight: bold;
+            padding: 10px 15px;
+            font-size: 1.2em;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }}
         .subtitulo {{
-            font-size: 16px;
-            margin-top: 4px;
+            font-size: 1.5em;
+            font-weight: bold;
         }}
         .llamado {{
-            border-top: 1px solid #ccc;
-            padding: 12px 16px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
         }}
-        .llamado p {{
-            margin: 4px 0;
+        .llamado .fecha {{
+            font-weight: bold;
         }}
         .actualizado {{
-            font-size: 12px;
+            font-size: 0.8em;
             color: #666;
             text-align: right;
-            padding: 10px 16px;
-            border-top: 1px solid #ccc;
-            background: #f9f9f9;
+            margin-top: 1em;
         }}
     </style>
 </head>
 <body>
     <div class="contenedor">
-        <div class="encabezado">
+        <div class="titulo">
             8va Compañía de Bomberos de Santiago<br>
             <span class="subtitulo">Últimos Llamados</span>
         </div>
@@ -99,14 +100,14 @@ def generar_html(llamados):
         <div class="actualizado">Actualizado: {ahora}</div>
     </div>
 </body>
-</html>"""
-    return html
+</html>
+"""
 
 def main():
     llamados = extraer_llamados()
     html = generar_html(llamados)
-    with open("llamados_actualizado.html", "w", encoding="utf-8") as archivo:
-        archivo.write(html)
+    with open(ARCHIVO_SALIDA, "w", encoding="utf-8") as f:
+        f.write(html)
 
 if __name__ == "__main__":
     main()
