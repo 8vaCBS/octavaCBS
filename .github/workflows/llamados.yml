@@ -24,12 +24,13 @@ jobs:
           pip install playwright
           playwright install --with-deps
 
-      - name: Ejecutar extractor de llamados
+      - name: Ejecutar script de llamados
         run: python extractor_llamados.py
-      - name: Commit y push de 'llamados_actualizado.html'
+
+      - name: Commit y push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add llamados_actualizado.html
-          git commit -m "Actualiza últimos llamados"
+          git commit -m "Actualización automática de llamados"
           git push
