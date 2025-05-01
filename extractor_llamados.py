@@ -8,7 +8,7 @@ def extraer_llamados():
         page.wait_for_timeout(3000)
 
         try:
-            tabla_llamados = page.locator("text=Últimos Llamados").locator("..").locator("..").inner_html()
+            tabla_llamados = page.locator("text=En tiempo Real").locator("..").locator("..").inner_html()
         except:
             tabla_llamados = "<p>No se encontró información de los llamados.</p>"
 
