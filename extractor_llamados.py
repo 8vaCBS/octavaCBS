@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from playwright.sync_api import sync_playwright
 from datetime import datetime
 
@@ -8,8 +5,10 @@ def extraer_llamados() -> list[str]:
     with sync_playwright() as p:
         navegador = p.chromium.launch()
         pagina = navegador.new_page()
-        pagina.goto("https://icbs.cl/c/v/985", timeout=60000)
-        pagina.wait_for_selector("#resultado table tr", timeout=60000)
+        pagina.goto("https://icbs.cl/c/v/985", timeout=90000)
+        
+        # Esperamos que el contenido general esté cargado
+        pagina.wait_for_selector("table", timeout=90000)
 
         filas = pagina.query_selector_all("#resultado table tr")[1:]
         llamados = []
@@ -25,12 +24,11 @@ def main():
     llamados = extraer_llamados()
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Preparamos el bloque de <p>…</p> por separado
+    # Contenido dinámico
     if llamados:
-        lineas = [f"<p>{ll}</p>" for ll in llamados]
+        cuerpo_html = "\n".join(f"<p>{l}</p>" for l in llamados)
     else:
-        lineas = ["<p>No se encontró información de los llamados.</p>"]
-    cuerpo_html = "\n      ".join(lineas)
+        cuerpo_html = "<p>No se encontró información de los llamados.</p>"
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -39,16 +37,29 @@ def main():
   <title>8va Compañía de Bomberos de Santiago – Últimos Llamados</title>
   <style>
     body {{ margin:0; padding:0; font-family: Arial, sans-serif; }}
-    .container {{ max-width: 500px; margin: auto; background: #fff;
-                 border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-                 overflow: hidden; }}
-    .header {{ background: #003366; color: #fff; padding: 12px 20px; }}
+    .container {{
+      max-width: 500px; margin: auto; background: #fff;
+      border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }}
+    .header {{
+      background: #003366; color: #fff; padding: 12px 20px;
+    }}
     .header h1 {{ margin: 0; font-size: 1.1rem; }}
     .header h2 {{ margin: 4px 0 0; font-size: 1.3rem; }}
     .body {{ padding: 20px; color: #333; }}
-    .body p {{ margin: 0 0 12px; font-size: 0.95rem; line-height: 1.4; }}
-    .footer {{ background: #f5f5f5; padding: 8px 20px; font-size: 0.8rem;
-               color: #555; text-align: right; }}
+    .body p {{
+      margin: 0 0 12px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }}
+    .footer {{
+      background: #f5f5f5;
+      padding: 8px 20px;
+      font-size: 0.8rem;
+      color: #555;
+      text-align: right;
+    }}
   </style>
 </head>
 <body>
