@@ -19,7 +19,7 @@ def extraer_llamados():
     <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>Últimos Llamados - Octava</title>
+        <title>8va Compañía Bomberos de Santiago</title>
         <style>
             body {{
                 font-family: Arial, sans-serif;
@@ -40,7 +40,7 @@ def extraer_llamados():
     </head>
     <body>
         <div class="contenedor">
-            <h1>📟 Últimos Llamados</h1>
+            <h1>📟 Actualización</h1>
             {tabla_llamados}
         </div>
     </body>
