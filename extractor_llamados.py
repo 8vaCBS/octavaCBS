@@ -21,57 +21,22 @@ def generar_html(llamados):
         detalle = llamados[i+1] if i+1 < len(llamados) else ""
         lista_llamados += f"<li><strong>{fecha}</strong> – {detalle}</li>\n"
 
-    html = f"""<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Últimos Llamados - Octava Compañía</title>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 2rem;
-            display: flex;
-            justify-content: center;
-        }}
-        .contenedor {{
-            background-color: #fff;
-            border: 3px solid red;
-            border-radius: 12px;
-            padding: 1.5rem;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }}
-        h1 {{
-            color: red;
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }}
-        .fecha {{
-            font-size: 0.9rem;
-            color: #555;
-            margin-bottom: 1rem;
-        }}
-        ul {{
-            padding-left: 1.2rem;
-        }}
-        li {{
-            margin-bottom: 0.75rem;
-            line-height: 1.4;
-        }}
-        @media (max-width: 600px) {{
-            body {{
-                padding: 1rem;
-            }}
-            .contenedor {{
-                padding: 1rem;
-            }}
-        }}
-    </style>
-</head>
-<body>
-    <div class="contenedor">
-        <h1>Últimos Llamados - Octava Comp
+    html = (
+        "<!DOCTYPE html>\n"
+        "<html lang='es'>\n"
+        "<head>\n"
+        "    <meta charset='UTF-8'>\n"
+        "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"
+        "    <title>Últimos Llamados - Octava Compañía</title>\n"
+        "    <style>\n"
+        "        body {\n"
+        "            font-family: Arial, sans-serif;\n"
+        "            background-color: #ffffff;\n"
+        "            margin: 0;\n"
+        "            padding: 2rem;\n"
+        "            display: flex;\n"
+        "            justify-content: center;\n"
+        "        }\n"
+        "        .contenedor {\n"
+        "            background-color: #fff;\n"
+        "
