@@ -1,70 +1,62 @@
 from playwright.sync_api import sync_playwright
-import datetime
+from datetime import datetime
+from bs4 import BeautifulSoup
 
 def extraer_llamados():
     with sync_playwright() as p:
-        navegador = p.chromium.launch(headless=True)
+        navegador = p.chromium.launch()
         pagina = navegador.new_page()
-        pagina.goto("https://icbs.cl/c/v/985", timeout=120000)
-
-        pagina.wait_for_selector("#set_llamados > div", timeout=60000)
-        llamados_html = pagina.locator("#set_llamados > div").all()
-        llamados = []
-
-        total = len(llamados_html)
-        pares = total if total % 2 == 0 else total - 1  # Asegura que haya pares
-
-        for i in range(0, pares, 2):
-            fecha = llamados_html[i].inner_text().strip()
-            texto = llamados_html[i+1].inner_text().strip()
-            llamados.append(f"{fecha} - {texto}")
-
+        pagina.goto("https://icbs.cl/c/v/985", timeout=60000)
+        pagina.wait_for_selector("#set_llamados", timeout=60000)
+        html = pagina.inner_html("#set_llamados")
         navegador.close()
-        return llamados
+        return html
+
+def procesar_html(html):
+    soup = BeautifulSoup(html, "html.parser")
+    llamados = []
+
+    filas = soup.select("tr")
+    for fila in filas:
+        columnas = fila.find_all("td")
+        if len(columnas) >= 2:
+            hora = columnas[0].get_text(strip=True)
+            detalle = columnas[1].get_text(strip=True)
+            if hora and detalle:
+                llamados.append(f"{hora} - {detalle}")
+    return llamados
+
+def generar_html(llamados):
+    ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    html = f"""
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Últimos Llamados - Octava Compañía</title>
+    </head>
+    <body>
+        <h2>Últimos Llamados - Octava Compañía</h2>
+        <p>Última actualización: {ahora}</p>
+        <ul>
+    """
+    for llamado in llamados:
+        html += f"<li>{llamado}</li>\n"
+    html += """
+        </ul>
+    </body>
+    </html>
+    """
+    return html
+
+def guardar_html(html):
+    with open("llamados_actualizado.html", "w", encoding="utf-8") as archivo:
+        archivo.write(html)
 
 def main():
-    llamados = extraer_llamados()
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    with open("llamados_actualizado.html", "w", encoding="utf-8") as f:
-        f.write(f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>Últimos Llamados</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
-                    color: #333;
-                    padding: 20px;
-                }}
-                .llamado {{
-                    margin-bottom: 10px;
-                    padding: 10px;
-                    border-left: 4px solid #c00;
-                    background-color: #fff;
-                }}
-                .timestamp {{
-                    font-size: 12px;
-                    color: #888;
-                    margin-top: 20px;
-                }}
-            </style>
-        </head>
-        <body>
-            <h2>Últimos Llamados - Octava Compañía</h2>
-        """)
-
-        for llamado in llamados:
-            f.write(f'<div class="llamado">{llamado}</div>\n')
-
-        f.write(f"""
-            <div class="timestamp">Última actualización: {now}</div>
-        </body>
-        </html>
-        """)
+    html_crudo = extraer_llamados()
+    llamados = procesar_html(html_crudo)
+    html_final = generar_html(llamados)
+    guardar_html(html_final)
 
 if __name__ == "__main__":
     main()
