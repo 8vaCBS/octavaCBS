@@ -6,23 +6,24 @@ def extraer_llamados():
         navegador = p.chromium.launch(headless=True)
         pagina = navegador.new_page()
         pagina.goto("https://icbs.cl/c/v/985", timeout=120000)
-        
-        # Espera a que cargue el contenido dinámico de los llamados
-        pagina.wait_for_selector("#set_llamados > div", timeout=60000)
 
+        pagina.wait_for_selector("#set_llamados > div", timeout=60000)
         llamados_html = pagina.locator("#set_llamados > div").all()
         llamados = []
-        for i in range(0, len(llamados_html), 2):
+
+        total = len(llamados_html)
+        pares = total if total % 2 == 0 else total - 1  # Asegura que haya pares
+
+        for i in range(0, pares, 2):
             fecha = llamados_html[i].inner_text().strip()
             texto = llamados_html[i+1].inner_text().strip()
             llamados.append(f"{fecha} - {texto}")
-        
+
         navegador.close()
         return llamados
 
 def main():
     llamados = extraer_llamados()
-
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     with open("llamados_actualizado.html", "w", encoding="utf-8") as f:
