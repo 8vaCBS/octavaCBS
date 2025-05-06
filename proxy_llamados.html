@@ -1,79 +1,50 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Últimos Llamados - Octava</title>
+  <meta charset="UTF-8">
+  <title>Últimos Llamados - Octava Compañía</title>
   <style>
     body {
-      font-family: 'Helvetica Neue', sans-serif;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      color: #333;
       padding: 20px;
-      background: #f9f9f9;
     }
-    .contenedor {
-      max-width: 1000px;
-      margin: auto;
-      background: #ffffff;
-      border: 2px solid #003366;
-      border-radius: 12px;
+    .ultimos-llamados {
+      border: 2px solid red;
+      background-color: #eee;
       padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    h2 {
-      color: #003366;
-      font-size: 22px;
-      margin-bottom: 12px;
-      text-align: center;
+      border-radius: 10px;
     }
     .llamado {
-      border-bottom: 1px solid #ccc;
-      padding: 10px 0;
-    }
-    .llamado:last-child {
-      border-bottom: none;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: white;
+      border-left: 5px solid red;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .fecha {
-      font-size: 14px;
-      color: #888;
-    }
-    .detalle {
-      font-size: 16px;
-      color: #222;
-    }
-    @media (max-width: 600px) {
-      .contenedor {
-        padding: 12px;
-      }
-      h2 {
-        font-size: 18px;
-      }
+      font-weight: bold;
+      color: #c00;
     }
   </style>
 </head>
 <body>
-  <div class="contenedor" id="llamados-container">
-    <h2>8va Compañía de Bomberos de Santiago<br>Últimos Llamados</h2>
-    <div id="contenido"></div>
+  <h1>Últimos Llamados</h1>
+  <div class="ultimos-llamados">
+    <!-- El contenido se actualizará automáticamente mediante extractor_llamados.py -->
+    <div class="llamado">
+      <div class="fecha">01/05/2025 - 14:22</div>
+      <div class="detalle">Incendio estructural - Av. Santa Rosa 1234</div>
+    </div>
+    <div class="llamado">
+      <div class="fecha">01/05/2025 - 13:45</div>
+      <div class="detalle">Rescate vehicular - Ruta 5 Sur Km 25</div>
+    </div>
   </div>
-
+  <p style="font-size: small; color: gray;">Última actualización automática: <span id="timestamp"></span></p>
   <script>
-    async function cargarLlamados() {
-      try {
-        const response = await fetch("https://8vacbs.github.io/octavaCBS/llamados_actualizado.html");
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const llamados = doc.querySelectorAll(".llamado");
-
-        const contenedor = document.getElementById("contenido");
-        llamados.forEach(el => contenedor.appendChild(el.cloneNode(true)));
-      } catch (e) {
-        document.getElementById("contenido").innerHTML = "<p style='color:red;'>⚠️ Error al cargar los últimos llamados.</p>";
-        console.error(e);
-      }
-    }
-    cargarLlamados();
+    document.getElementById("timestamp").textContent = new Date().toLocaleString();
   </script>
 </body>
 </html>
