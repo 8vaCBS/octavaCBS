@@ -1,16 +1,16 @@
 name: Actualizar llamados
 
 on:
-  push:
+  workflow_dispatch:
   schedule:
-    - cron: '*/30 * * * *'  # Cada 30 minutos
+    - cron: '*/15 * * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Clonar repositorio
-        uses: actions/checkout@v4
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -21,25 +21,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install playwright
-          playwright install --with-deps
+          playwright install
 
-      - name: Ejecutar script extractor_llamados.py
+      - name: Ejecutar script de extracción
         run: python extractor_llamados.py
 
-      - name: Subir HTML como artefacto de página
-        uses: actions/upload-pages-artifact@v3
+      - name: Subir archivo actualizado
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          path: llamados_actualizado.html
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Desplegar a GitHub Pages
-        uses: actions/deploy-pages@v4
+          commit_message: Actualización automática de llamados
+          file_pattern: llamados_actualizado.html
