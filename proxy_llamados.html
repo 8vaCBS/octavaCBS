@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="600">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Últimos Llamados</title>
+    <style>
+        body {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .contenedor {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 3px solid #c80000;
+            border-radius: 12px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        h1 {
+            color: #c80000;
+            text-align: center;
+        }
+        .llamado {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+        .llamado:last-child {
+            border-bottom: none;
+        }
+        .fecha {
+            font-weight: bold;
+            color: #555;
+        }
+        .texto {
+            color: #333;
+            margin-top: 5px;
+        }
+        .actualizado {
+            text-align: right;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Últimos Llamados</h1>
+        <!-- Aquí se inyectarán los llamados desde el script generado -->
+        <div id="contenido-llamados">
+            <!-- Contenido será reemplazado por llamados_actualizado.html -->
+        </div>
+        <div class="actualizado">Última actualización: <!-- FECHA --></div>
+    </div>
+</body>
+</html>
