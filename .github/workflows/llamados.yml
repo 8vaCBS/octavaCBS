@@ -4,6 +4,7 @@ on:
   push:
   schedule:
     - cron: '*/30 * * * *'  # Cada 30 minutos
+  workflow_dispatch:       # Permite ejecutar el flujo manualmente
 
 jobs:
   build:
