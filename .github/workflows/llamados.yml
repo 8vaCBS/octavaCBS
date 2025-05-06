@@ -1,35 +1,45 @@
 name: Actualizar llamados
 
 on:
+  push:
   schedule:
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *'  # Cada 30 minutos
 
 jobs:
-  scrape-and-update:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Instalar dependencias
         run: |
+          python -m pip install --upgrade pip
           pip install playwright
-          playwright install
+          playwright install --with-deps
 
-      - name: Run extractor
+      - name: Ejecutar script extractor_llamados.py
         run: python extractor_llamados.py
 
-      - name: Commit changes
-        run: |
-          git config --global user.name 'Octava CBS Bot'
-          git config --global user.email 'bot@octavacbs.cl'
-          git add llamados_actualizado.html
-          git commit -m "Actualización automática de llamados"
-          git push
+      - name: Subir HTML como artefacto de página
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar a GitHub Pages
+        uses: actions/deploy-pages@v4
