@@ -7,7 +7,7 @@ def extraer_llamados():
         browser = p.chromium.launch(headless=True)
         pagina = browser.new_page()
         pagina.goto("https://icbs.cl/c/v/985", wait_until="networkidle")
-        pagina.wait_for_selector(".tabla14, .tabla15", timeout=60000)
+        pagina.wait_for_selector(".ultimos-llamados .llamado", timeout=60000)
         contenido = pagina.inner_html("#resultado")
         browser.close()
         return contenido
