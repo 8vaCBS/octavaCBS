@@ -1,24 +1,73 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Últimos Llamados - Octava Compañía</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
-        h1 { color: #333; }
-        ul { padding-left: 20px; }
-        li { margin-bottom: 10px; }
-        .timestamp { font-size: 0.9em; color: #666; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Últimos Llamados - Octava Compañía</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 1rem;
+      color: #222;
+    }
+    .container {
+      background-color: #fff;
+      border: 3px solid #cc0000;
+      border-radius: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 1.6rem;
+      color: #cc0000;
+      margin-bottom: 0.2rem;
+    }
+    .timestamp {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    li {
+      background: #eee;
+      margin-bottom: 0.6rem;
+      padding: 0.75rem;
+      border-left: 5px solid #cc0000;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 1rem;
+        border-radius: 8px;
+      }
+      h1 {
+        font-size: 1.2rem;
+      }
+      li {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
     <h1>Últimos Llamados - Octava Compañía</h1>
-    <p class="timestamp">Última actualización: 2025-05-06 23:12:56</p>
+    <p class="timestamp">Última actualización: {{FECHA_HORA}}</p>
     <ul>
-        <li>2025-05-06 15:02:45
-10-3-1 JOSÉ MIGUEL DE LA BARRA / MERCED B2, RX8</li><li>2025-05-06 15:02:45</li><li>10-3-1 JOSÉ MIGUEL DE LA BARRA / MERCED B2, RX8</li><li>2025-05-06 13:33:17
-10-3-1 AVENIDA MANQUEHUE NORTE / AVENIDA VITACURA RX8</li><li>2025-05-06 13:33:17</li><li>10-3-1 AVENIDA MANQUEHUE NORTE / AVENIDA VITACURA RX8</li><li>2025-05-06 08:26:16
-10-4-1 AVENIDA RECOLETA / MARÍA GRAHAM B2, RX8</li><li>2025-05-06 08:26:16</li><li>10-4-1 AVENIDA RECOLETA / MARÍA GRAHAM B2, RX8</li>
+      {{LLAMADOS_HTML}}
     </ul>
+  </div>
 </body>
 </html>
