@@ -7,7 +7,7 @@ def extraer_llamados():
         pagina = navegador.new_page()
         pagina.goto("https://icbs.cl/c/v/985", timeout=90000)
         pagina.wait_for_selector("#set_llamados", timeout=60000)
-        
+
         llamados_divs = pagina.locator("#set_llamados div")
         cantidad = llamados_divs.count()
         llamados_puros = []
@@ -19,20 +19,21 @@ def extraer_llamados():
 
         navegador.close()
 
-        # Agrupar de a pares: [fecha, contenido, fecha, contenido, ...] → solo queremos los contenidos
-        llamados_contenido = []
-        for i in range(1, len(llamados_puros), 2):
-            llamados_contenido.append(llamados_puros[i])
+        # Agrupar en pares: fecha + contenido, y devolver solo los contenidos (sin fechas)
+        llamados_agrupados = []
+        for i in range(0, len(llamados_puros) - 1, 2):
+            contenido = llamados_puros[i + 1]
+            llamados_agrupados.append(contenido)
 
-        return llamados_contenido[-3:]  # últimos 3 llamados (contenido)
+        return llamados_agrupados[-3:]  # Solo los tres últimos llamados (sin fechas)
 
 def generar_html(llamados):
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not llamados:
-        llamados_html = "<li><strong>No se encontraron llamados.</strong></li>"
+        llamados_html = "<li>No se encontraron llamados.</li>"
     else:
-        llamados_html = "\n".join(f"<li><strong>{contenido}</strong></li>" for contenido in llamados)
+        llamados_html = "\n".join(f"<li>{llamado}</li>" for llamado in llamados)
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -66,8 +67,10 @@ def generar_html(llamados):
       margin-top: 10px;
     }}
     li {{
-      margin-bottom: 16px;
-      line-height: 1.6;
+      margin-bottom: 12px;
+      line-height: 1.5;
+      font-size: 1em;
+      color: #222;
     }}
     .fecha {{
       text-align: right;
@@ -98,9 +101,9 @@ def main():
         llamados = extraer_llamados()
         html = generar_html(llamados)
         guardar_html(html)
-        print("✅ Archivo HTML actualizado correctamente.")
+        print("✅ Archivo HTML generado correctamente.")
     except Exception as e:
-        print("❌ Error al procesar los llamados:", e)
+        print("❌ Error al generar el archivo:", e)
 
 if __name__ == "__main__":
     main()
