@@ -19,14 +19,12 @@ def extraer_llamados():
 
         navegador.close()
 
-        # Agrupar en pares (fecha + contenido) y tomar solo los tres últimos
-        llamados_agrupados = []
-        for i in range(0, len(llamados_puros) - 1, 2):
-            fecha = llamados_puros[i]
-            contenido = llamados_puros[i + 1]
-            llamados_agrupados.append((fecha, contenido))
+        # Agrupar de a pares: [fecha, contenido, fecha, contenido, ...] → solo queremos los contenidos
+        llamados_contenido = []
+        for i in range(1, len(llamados_puros), 2):
+            llamados_contenido.append(llamados_puros[i])
 
-        return llamados_agrupados[-3:]  # Solo los tres últimos llamados
+        return llamados_contenido[-3:]  # últimos 3 llamados (contenido)
 
 def generar_html(llamados):
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -34,10 +32,7 @@ def generar_html(llamados):
     if not llamados:
         llamados_html = "<li><strong>No se encontraron llamados.</strong></li>"
     else:
-        llamados_html = "\n".join(
-            f'<li><span style="font-size: 0.85em; color: #666;">{fecha}</span><br><strong>{contenido}</strong></li>'
-            for fecha, contenido in llamados
-        )
+        llamados_html = "\n".join(f"<li><strong>{contenido}</strong></li>" for contenido in llamados)
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
