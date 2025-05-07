@@ -7,33 +7,30 @@ def extraer_llamados():
         pagina = navegador.new_page()
         pagina.goto("https://icbs.cl/c/v/985", timeout=90000)
         pagina.wait_for_selector("#set_llamados", timeout=60000)
-
-        llamados_divs = pagina.locator("#set_llamados div")
-        cantidad = llamados_divs.count()
-        llamados_puros = []
+        
+        divs = pagina.locator("#set_llamados div")
+        cantidad = divs.count()
+        items = []
 
         for i in range(cantidad):
-            texto = llamados_divs.nth(i).inner_text().strip()
+            texto = divs.nth(i).inner_text().strip()
             if texto:
-                llamados_puros.append(texto)
+                items.append(texto)
 
         navegador.close()
 
-        # Agrupar en pares: fecha + contenido, y devolver solo los contenidos (sin fechas)
-        llamados_agrupados = []
-        for i in range(0, len(llamados_puros) - 1, 2):
-            contenido = llamados_puros[i + 1]
-            llamados_agrupados.append(contenido)
+        # Agrupar en pares: [fecha, llamado, fecha, llamado, ...] → [(llamado1), (llamado2), ...]
+        llamados = []
+        for i in range(0, len(items) - 1, 2):
+            llamado = items[i + 1]  # Solo contenido del llamado, sin la fecha
+            llamados.append(llamado)
 
-        return llamados_agrupados[-3:]  # Solo los tres últimos llamados (sin fechas)
+        return llamados[-4:]  # Últimos 4 llamados
 
 def generar_html(llamados):
-    ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    if not llamados:
-        llamados_html = "<li>No se encontraron llamados.</li>"
-    else:
-        llamados_html = "\n".join(f"<li>{llamado}</li>" for llamado in llamados)
+    filas = "\n".join(f"<tr><td>{llamado}</td></tr>" for llamado in llamados) if llamados else "<tr><td>No se encontraron llamados.</td></tr>"
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -62,15 +59,14 @@ def generar_html(llamados):
       font-size: 1.8em;
       margin-bottom: 10px;
     }}
-    ul {{
-      padding-left: 20px;
-      margin-top: 10px;
+    table {{
+      width: 100%;
+      border-collapse: collapse;
     }}
-    li {{
-      margin-bottom: 12px;
-      line-height: 1.5;
+    td {{
+      padding: 8px 0;
+      border-bottom: 1px solid #ccc;
       font-size: 1em;
-      color: #222;
     }}
     .fecha {{
       text-align: right;
@@ -83,10 +79,10 @@ def generar_html(llamados):
 <body>
   <div class="contenedor">
     <h1>Últimos llamados</h1>
-    <ul>
-      {llamados_html}
-    </ul>
-    <div class="fecha">Actualizado: {ahora}</div>
+    <table>
+      {filas}
+    </table>
+    <div class="fecha">Actualizado: {fecha_actual}</div>
   </div>
 </body>
 </html>"""
@@ -101,9 +97,9 @@ def main():
         llamados = extraer_llamados()
         html = generar_html(llamados)
         guardar_html(html)
-        print("✅ Archivo HTML generado correctamente.")
+        print("✅ Archivo HTML generado con éxito.")
     except Exception as e:
-        print("❌ Error al generar el archivo:", e)
+        print("❌ Error:", e)
 
 if __name__ == "__main__":
     main()
