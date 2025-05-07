@@ -19,17 +19,11 @@ def extraer_llamados():
 
         navegador.close()
 
-        # Agrupar en pares: [fecha, llamado, fecha, llamado, ...] → [(llamado1), (llamado2), ...]
-        llamados = []
-        for i in range(0, len(items) - 1, 2):
-            llamado = items[i + 1]  # Solo contenido del llamado, sin la fecha
-            llamados.append(llamado)
-
+        # Agrupar en pares [fecha, llamado, fecha, llamado, ...] → tomar solo los llamados
+        llamados = [items[i + 1] for i in range(0, len(items) - 1, 2)]
         return llamados[-4:]  # Últimos 4 llamados
 
 def generar_html(llamados):
-    fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
     filas = "\n".join(f"<tr><td>{llamado}</td></tr>" for llamado in llamados) if llamados else "<tr><td>No se encontraron llamados.</td></tr>"
 
     html = f"""<!DOCTYPE html>
@@ -68,12 +62,6 @@ def generar_html(llamados):
       border-bottom: 1px solid #ccc;
       font-size: 1em;
     }}
-    .fecha {{
-      text-align: right;
-      font-size: 0.9em;
-      color: #666;
-      margin-top: 10px;
-    }}
   </style>
 </head>
 <body>
@@ -82,7 +70,6 @@ def generar_html(llamados):
     <table>
       {filas}
     </table>
-    <div class="fecha">Actualizado: {fecha_actual}</div>
   </div>
 </body>
 </html>"""
@@ -97,7 +84,7 @@ def main():
         llamados = extraer_llamados()
         html = generar_html(llamados)
         guardar_html(html)
-        print("✅ Archivo HTML generado con éxito.")
+        print("✅ Archivo HTML generado correctamente.")
     except Exception as e:
         print("❌ Error:", e)
 
