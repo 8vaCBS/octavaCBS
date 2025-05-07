@@ -10,26 +10,31 @@ def extraer_llamados():
         
         llamados_divs = pagina.locator("#set_llamados div")
         cantidad = llamados_divs.count()
-        lista_llamados = []
+        llamados_puros = []
 
-        for i in range(0, cantidad, 2):
-            if i + 1 < cantidad:
-                div1 = llamados_divs.nth(i).inner_text().strip()
-                div2 = llamados_divs.nth(i + 1).inner_text().strip()
-                # Si div2 está contenido en div1, elimina para obtener solo la fecha
-                fecha = div1.replace(div2, "").strip()
-                contenido = div2
-                lista_llamados.append((fecha, contenido))
+        for i in range(cantidad):
+            texto = llamados_divs.nth(i).inner_text().strip()
+            if texto:
+                llamados_puros.append(texto)
 
         navegador.close()
-        return lista_llamados[-3:]  # Solo los últimos 3 llamados
+
+        # Agrupar en pares (fecha + contenido) y tomar solo los tres últimos
+        llamados_agrupados = []
+        for i in range(0, len(llamados_puros) - 1, 2):
+            fecha = llamados_puros[i]
+            contenido = llamados_puros[i + 1]
+            llamados_agrupados.append((fecha, contenido))
+
+        return llamados_agrupados[-3:]  # Solo los tres últimos llamados
 
 def generar_html(llamados):
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     if not llamados:
-        html_llamados = "<li><strong>No se encontraron llamados.</strong></li>"
+        llamados_html = "<li><strong>No se encontraron llamados.</strong></li>"
     else:
-        html_llamados = "\n".join(
+        llamados_html = "\n".join(
             f'<li><span style="font-size: 0.85em; color: #666;">{fecha}</span><br><strong>{contenido}</strong></li>'
             for fecha, contenido in llamados
         )
@@ -81,7 +86,7 @@ def generar_html(llamados):
   <div class="contenedor">
     <h1>Últimos llamados</h1>
     <ul>
-      {html_llamados}
+      {llamados_html}
     </ul>
     <div class="fecha">Actualizado: {ahora}</div>
   </div>
@@ -98,9 +103,9 @@ def main():
         llamados = extraer_llamados()
         html = generar_html(llamados)
         guardar_html(html)
-        print("Archivo HTML actualizado con éxito.")
+        print("✅ Archivo HTML actualizado correctamente.")
     except Exception as e:
-        print("Error al procesar los llamados:", e)
+        print("❌ Error al procesar los llamados:", e)
 
 if __name__ == "__main__":
     main()
