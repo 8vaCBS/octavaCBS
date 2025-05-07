@@ -1,61 +1,103 @@
 from playwright.sync_api import sync_playwright
 from datetime import datetime
-from bs4 import BeautifulSoup
 
 def extraer_llamados():
     with sync_playwright() as p:
         navegador = p.chromium.launch()
         pagina = navegador.new_page()
-        pagina.goto("https://icbs.cl/c/v/985", timeout=120000)
+        pagina.goto("https://icbs.cl/c/v/985", timeout=90000)
 
-        pagina.wait_for_selector("#set_llamados", timeout=90000)
-        html_set_llamados = pagina.query_selector("#set_llamados").inner_html()
+        # Espera que se cargue el contenedor principal
+        pagina.wait_for_selector("#set_llamados", timeout=60000)
+
+        llamados = pagina.locator("#set_llamados div")
+        cantidad = llamados.count()
+        lista_llamados = []
+
+        for i in range(cantidad):
+            div = llamados.nth(i)
+            texto = div.inner_text().strip()
+            if texto:
+                lista_llamados.append(texto)
 
         navegador.close()
-
-    # Procesar con BeautifulSoup
-    soup = BeautifulSoup(html_set_llamados, "html.parser")
-    bloques = soup.find_all(class_=["tabla14", "tabla15"])
-
-    llamados = []
-    for i in range(0, len(bloques), 2):
-        if i + 1 < len(bloques):
-            fecha = bloques[i].get_text(strip=True)
-            texto = bloques[i + 1].get_text(strip=True)
-            llamados.append(f"<li><strong>{fecha}</strong> – {texto}</li>")
-    return llamados
+        return lista_llamados
 
 def generar_html(llamados):
-    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     if not llamados:
         llamados_html = "<li><strong>No se encontraron llamados.</strong></li>"
     else:
-        llamados_html = "\n".join(llamados)
+        llamados_html = "\n".join(f"<li>{llamado}</li>" for llamado in llamados)
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Últimos Llamados - Octava Compañía</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Últimos Llamados - Octava Compañía</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {{
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }}
+    .contenedor {{
+      background-color: white;
+      border: 3px solid red;
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 700px;
+      margin: 0 auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }}
+    h1 {{
+      color: red;
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }}
+    ul {{
+      padding-left: 20px;
+      margin-top: 10px;
+    }}
+    li {{
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }}
+    .fecha {{
+      text-align: right;
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
+    }}
+  </style>
 </head>
-<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
-    <div style="max-width: 700px; margin: auto; padding: 30px; background: #fff; border: 2px solid red; border-radius: 10px;">
-        <h2 style="color: red; margin-bottom: 10px;">Últimos llamados</h2>
-        <ul style="padding-left: 20px; font-size: 16px;">
-            {llamados_html}
-        </ul>
-        <p style="text-align: right; font-size: 0.9em; color: #555;">Actualizado: {fecha_hora}</p>
-    </div>
+<body>
+  <div class="contenedor">
+    <h1>Últimos llamados</h1>
+    <ul>
+      {llamados_html}
+    </ul>
+    <div class="fecha">Actualizado: {ahora}</div>
+  </div>
 </body>
 </html>"""
     return html
 
-def main():
-    llamados = extraer_llamados()
-    html = generar_html(llamados)
+def guardar_html(contenido):
     with open("llamados_actualizado.html", "w", encoding="utf-8") as archivo:
-        archivo.write(html)
+        archivo.write(contenido)
+
+def main():
+    try:
+        llamados = extraer_llamados()
+        html = generar_html(llamados)
+        guardar_html(html)
+        print("✅ Archivo HTML actualizado con éxito.")
+    except Exception as e:
+        print("❌ Error al procesar los llamados:", e)
 
 if __name__ == "__main__":
     main()
