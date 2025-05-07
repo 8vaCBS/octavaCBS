@@ -1,33 +1,32 @@
-
 from playwright.sync_api import sync_playwright
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 def extraer_llamados():
     with sync_playwright() as p:
         navegador = p.chromium.launch()
         pagina = navegador.new_page()
-        pagina.goto("https://icbs.cl/c/v/985")
+        pagina.goto("https://icbs.cl/c/v/985", timeout=120000)
 
-        # Espera primero que cargue el contenedor principal
         pagina.wait_for_selector("#set_llamados", timeout=90000)
-
-        # Espera por los elementos específicos dentro del contenedor
-        pagina.wait_for_selector("#set_llamados .tabla14, #set_llamados .tabla15", timeout=90000)
-        llamados_html = pagina.query_selector_all("#set_llamados .tabla14, #set_llamados .tabla15")
-
-        # Procesar llamados (fecha y contenido de cada fila)
-        llamados = []
-        for i in range(0, len(llamados_html), 2):
-            if i + 1 < len(llamados_html):
-                fecha = llamados_html[i].inner_text().strip()
-                texto = llamados_html[i + 1].inner_text().strip()
-                llamados.append(f"<li><strong>{fecha}</strong> – {texto}</li>")
+        html_set_llamados = pagina.query_selector("#set_llamados").inner_html()
 
         navegador.close()
-        return llamados
 
-def generate_html(llamados):
-    fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Procesar con BeautifulSoup
+    soup = BeautifulSoup(html_set_llamados, "html.parser")
+    bloques = soup.find_all(class_=["tabla14", "tabla15"])
+
+    llamados = []
+    for i in range(0, len(bloques), 2):
+        if i + 1 < len(bloques):
+            fecha = bloques[i].get_text(strip=True)
+            texto = bloques[i + 1].get_text(strip=True)
+            llamados.append(f"<li><strong>{fecha}</strong> – {texto}</li>")
+    return llamados
+
+def generar_html(llamados):
+    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if not llamados:
         llamados_html = "<li><strong>No se encontraron llamados.</strong></li>"
     else:
@@ -36,61 +35,25 @@ def generate_html(llamados):
     html = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Últimos Llamados - Octava Compañía</title>
-  <style>
-    body {{
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }}
-    .contenedor {{
-      background-color: white;
-      border: 3px solid red;
-      border-radius: 15px;
-      padding: 20px;
-      max-width: 700px;
-      margin: 0 auto;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }}
-    h1 {{
-      color: red;
-      font-size: 1.8em;
-      margin-bottom: 10px;
-    }}
-    ul {{
-      padding-left: 20px;
-      margin-top: 10px;
-    }}
-    li {{
-      margin-bottom: 10px;
-      line-height: 1.5;
-    }}
-    .fecha {{
-      text-align: right;
-      font-size: 0.9em;
-      color: #666;
-      margin-top: 10px;
-    }}
-  </style>
+    <meta charset="UTF-8">
+    <title>Últimos Llamados - Octava Compañía</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-  <div class="contenedor">
-    <h1>Últimos llamados</h1>
-    <ul>
-      {llamados_html}
-    </ul>
-    <div class="fecha">Actualizado: {fecha_actual}</div>
-  </div>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 700px; margin: auto; padding: 30px; background: #fff; border: 2px solid red; border-radius: 10px;">
+        <h2 style="color: red; margin-bottom: 10px;">Últimos llamados</h2>
+        <ul style="padding-left: 20px; font-size: 16px;">
+            {llamados_html}
+        </ul>
+        <p style="text-align: right; font-size: 0.9em; color: #555;">Actualizado: {fecha_hora}</p>
+    </div>
 </body>
 </html>"""
     return html
 
 def main():
     llamados = extraer_llamados()
-    html = generate_html(llamados)
+    html = generar_html(llamados)
     with open("llamados_actualizado.html", "w", encoding="utf-8") as archivo:
         archivo.write(html)
 
