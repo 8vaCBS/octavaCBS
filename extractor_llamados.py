@@ -7,7 +7,6 @@ def extraer_llamados():
         pagina = navegador.new_page()
         pagina.goto("https://icbs.cl/c/v/985", timeout=90000)
 
-        # Espera que se cargue el contenedor principal
         pagina.wait_for_selector("#set_llamados", timeout=60000)
 
         llamados = pagina.locator("#set_llamados div")
@@ -21,7 +20,15 @@ def extraer_llamados():
                 lista_llamados.append(texto)
 
         navegador.close()
-        return lista_llamados
+
+        # Agrupar llamados por pares (fecha + texto), tomar últimos 3 y formatear
+        pares = []
+        for i in range(0, len(lista_llamados) - 1, 2):
+            fecha = lista_llamados[i]
+            descripcion = lista_llamados[i + 1]
+            pares.append(f"<li><strong>{fecha}</strong> – {descripcion}</li>")
+
+        return pares[-3:]  # Solo los últimos 3 llamados
 
 def generar_html(llamados):
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -29,7 +36,7 @@ def generar_html(llamados):
     if not llamados:
         llamados_html = "<li><strong>No se encontraron llamados.</strong></li>"
     else:
-        llamados_html = "\n".join(f"<li>{llamado}</li>" for llamado in llamados)
+        llamados_html = "\n".join(llamados)
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
