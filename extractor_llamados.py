@@ -6,7 +6,6 @@ def extraer_llamados():
         navegador = p.chromium.launch()
         pagina = navegador.new_page()
         pagina.goto("https://icbs.cl/c/v/985", timeout=90000)
-
         pagina.wait_for_selector("#set_llamados", timeout=60000)
 
         llamados = pagina.locator("#set_llamados div")
@@ -20,30 +19,29 @@ def extraer_llamados():
                 lista_llamados.append(texto)
 
         navegador.close()
+        return lista_llamados[-6:]  # Últimos 3 llamados = 6 divs (pares: fecha + texto)
 
-        # Agrupar llamados por pares (fecha + texto), tomar últimos 3 y formatear
-        pares = []
-        for i in range(0, len(lista_llamados) - 1, 2):
-            fecha = lista_llamados[i]
-            descripcion = lista_llamados[i + 1]
-            pares.append(f"<li><strong>{fecha}</strong> – {descripcion}</li>")
+def generar_html(llamados_raw):
+    fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    llamados = []
+    for i in range(0, len(llamados_raw), 2):
+        if i + 1 < len(llamados_raw):
+            fecha = llamados_raw[i]
+            texto = llamados_raw[i + 1]
+            llamados.append(f"""
+                <li>
+                    <div class="fecha">{fecha}</div>
+                    <div class="texto"><strong>{texto}</strong></div>
+                </li>""")
 
-        return pares[-3:]  # Solo los últimos 3 llamados
-
-def generar_html(llamados):
-    ahora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    if not llamados:
-        llamados_html = "<li><strong>No se encontraron llamados.</strong></li>"
-    else:
-        llamados_html = "\n".join(llamados)
+    llamados_html = "\n".join(llamados) if llamados else "<li><strong>No se encontraron llamados.</strong></li>"
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Últimos Llamados - Octava Compañía</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Últimos Llamados - Octava Compañía</title>
   <style>
     body {{
       font-family: Arial, sans-serif;
@@ -74,6 +72,14 @@ def generar_html(llamados):
       line-height: 1.5;
     }}
     .fecha {{
+      font-size: 0.85em;
+      color: #555;
+    }}
+    .texto {{
+      font-size: 1em;
+      font-weight: bold;
+    }}
+    .actualizado {{
       text-align: right;
       font-size: 0.9em;
       color: #666;
@@ -87,7 +93,7 @@ def generar_html(llamados):
     <ul>
       {llamados_html}
     </ul>
-    <div class="fecha">Actualizado: {ahora}</div>
+    <div class="actualizado">Actualizado: {fecha_actual}</div>
   </div>
 </body>
 </html>"""
